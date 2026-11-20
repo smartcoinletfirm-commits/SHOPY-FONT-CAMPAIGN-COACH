@@ -1,21 +1,12 @@
-/* =========================================
-   SHOPY FONT — CAMPAIGN STORAGE
-   Local automatic saving system
-========================================= */
-
 const STORAGE_KEY = "shopy_font_first50_data_v1";
 
-/* DEFAULT CAMPAIGN DATA */
-
-const DEFAULT_DATA = {
-  version: 1,
-
+export const DEFAULT_DATA = {
   campaign: {
-    name: "FIRST 50",
+    name: "SHOPY FONT First 50 Campaign",
     target: 50,
     startDate: "2026-11-20",
     endDate: "2026-11-26",
-    createdAt: new Date().toISOString()
+    dailyTargets: [3, 7, 7, 8, 8, 8, 9]
   },
 
   prospects: [],
@@ -28,379 +19,302 @@ const DEFAULT_DATA = {
   coachAdvice: [],
 
   settings: {
-    ownerName: "Campaign Owner",
-    currency: "KES",
+    reminderEnabled: true,
     morningReminder: "08:00",
-    middayReminder: "13:00",
-    eveningReminder: "18:00",
-    reportReminder: "20:00",
-    remindersEnabled: true,
-    dailyStatusTarget: 3,
-    facebookPostTarget: 1,
-    tiktokVideoTarget: 1,
-    facebookReelTarget: 1,
-    dailyContactTarget: 10,
-    dailyFollowupTarget: 3
-  },
-
-  security: {
+    eveningReminder: "19:00",
+    dailyTargets: {
+      whatsappStatuses: 3,
+      facebookPosts: 1,
+      tiktokVideos: 1,
+      facebookReels: 1,
+      directOutreach: 10,
+      followUps: 3
+    },
     pinEnabled: false,
-    pinHash: null
+    pin: ""
   }
 };
 
-/* DEEP COPY */
-
-function cloneData(data) {
-  return JSON.parse(JSON.stringify(data));
+function cloneDefaults() {
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
-/* LOAD DATA */
+function normaliseData(data) {
+  const defaults = cloneDefaults();
 
-function loadData() {
+  return {
+    ...defaults,
+    ...data,
+    campaign: {
+      ...defaults.campaign,
+      ...(data.campaign || {})
+    },
+    settings: {
+      ...defaults.settings,
+      ...(data.settings || {}),
+      dailyTargets: {
+        ...defaults.settings.dailyTargets,
+        ...(data.settings?.dailyTargets || {})
+      }
+    },
+    prospects: Array.isArray(data.prospects) ? data.prospects : [],
+    activities: Array.isArray(data.activities) ? data.activities : [],
+    missions: Array.isArray(data.missions) ? data.missions : [],
+    reminders: Array.isArray(data.reminders) ? data.reminders : [],
+    challenges: Array.isArray(data.challenges) ? data.challenges : [],
+    socialRecords: Array.isArray(data.socialRecords) ? data.socialRecords : [],
+    history: Array.isArray(data.history) ? data.history : [],
+    coachAdvice: Array.isArray(data.coachAdvice) ? data.coachAdvice : []
+  };
+}
+
+export function loadData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
 
     if (!saved) {
-      const initialData = cloneData(DEFAULT_DATA);
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(initialData)
-      );
-      return initialData;
+      return cloneDefaults();
     }
 
-    const parsed = JSON.parse(saved);
-
-    return {
-      ...cloneData(DEFAULT_DATA),
-      ...parsed,
-
-      campaign: {
-        ...DEFAULT_DATA.campaign,
-        ...(parsed.campaign || {})
-      },
-
-      settings: {
-        ...DEFAULT_DATA.settings,
-        ...(parsed.settings || {})
-      },
-
-      security: {
-        ...DEFAULT_DATA.security,
-        ...(parsed.security || {})
-      },
-
-      prospects: Array.isArray(parsed.prospects) ? parsed.prospects : [],
-      activities: Array.isArray(parsed.activities) ? parsed.activities : [],
-      missions: Array.isArray(parsed.missions) ? parsed.missions : [],
-      reminders: Array.isArray(parsed.reminders) ? parsed.reminders : [],
-      challenges: Array.isArray(parsed.challenges) ? parsed.challenges : [],
-      socialRecords: Array.isArray(parsed.socialRecords) ? parsed.socialRecords : [],
-      history: Array.isArray(parsed.history) ? parsed.history : [],
-      coachAdvice: Array.isArray(parsed.coachAdvice) ? parsed.coachAdvice : []
-    };
-
+    return normaliseData(JSON.parse(saved));
   } catch (error) {
-    console.error("Unable to load campaign records:", error);
-
-    throw new Error(
-      "Your saved campaign data could not be loaded. Do not overwrite browser storage. Restore a backup or investigate the storage error first."
-    );
+    console.error("Could not load campaign data:", error);
+    return cloneDefaults();
   }
 }
 
-/* ACTIVE APPLICATION DATA */
+export let campaignData = loadData();
 
-let campaignData = loadData();
-
-/* SAVE DATA */
-
-function saveData() {
+export function saveData() {
   try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(campaignData)
-    );
-
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(campaignData));
     return true;
-
   } catch (error) {
-    console.error("Campaign saving failed:", error);
-
-    if (typeof showToast === "function") {
-      showToast(
-        "Saving failed. Export a backup and check browser storage.",
-        "error"
-      );
-    }
-
-    return false;
+    console.error("Could not save campaign data:", error);
+    throw new Error("Saving failed. Check your browser storage space.");
   }
 }
 
-/* GET COMPLETE DATA */
-
-function getData() {
+export function getData() {
   return campaignData;
 }
 
-/* UPDATE A DATA SECTION */
-
-function updateSection(section, value) {
+export function updateSection(section, value) {
   if (!(section in campaignData)) {
-    throw new Error("Unknown campaign data section: " + section);
+    throw new Error(`Unknown data section: ${section}`);
   }
 
   campaignData[section] = value;
-
-  return saveData();
+  saveData();
+  return campaignData[section];
 }
 
-/* UPDATE CAMPAIGN SETTINGS */
-
-function updateCampaign(values) {
+export function updateCampaign(updates) {
   campaignData.campaign = {
     ...campaignData.campaign,
-    ...values
+    ...updates
   };
 
-  return saveData();
+  saveData();
+  return campaignData.campaign;
 }
 
-/* UPDATE GENERAL SETTINGS */
-
-function updateSettings(values) {
+export function updateSettings(updates) {
   campaignData.settings = {
     ...campaignData.settings,
-    ...values
+    ...updates,
+    dailyTargets: {
+      ...campaignData.settings.dailyTargets,
+      ...(updates.dailyTargets || {})
+    }
   };
 
-  return saveData();
+  saveData();
+  return campaignData.settings;
 }
 
-/* GENERATE UNIQUE IDS */
-
-function createId(prefix = "record") {
-  return (
-    prefix +
-    "_" +
-    Date.now().toString(36) +
-    "_" +
-    Math.random().toString(36).slice(2, 9)
-  );
+export function createId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/* ADD RECORD */
-
-function addRecord(section, record) {
+export function addRecord(section, record) {
   if (!Array.isArray(campaignData[section])) {
-    throw new Error("Invalid record section: " + section);
+    throw new Error(`Invalid record section: ${section}`);
   }
 
   const newRecord = {
-    id: createId(section),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    id: record.id || createId(),
+    createdAt: record.createdAt || new Date().toISOString(),
     ...record
   };
 
-  campaignData[section].push(newRecord);
+  campaignData[section].unshift(newRecord);
 
-  if (!saveData()) {
-    campaignData[section].pop();
-    return null;
+  try {
+    saveData();
+  } catch (error) {
+    campaignData[section].shift();
+    throw error;
   }
 
   return newRecord;
 }
 
-/* UPDATE RECORD */
+export function updateRecord(section, id, updates) {
+  const records = campaignData[section];
 
-function updateRecord(section, id, updates) {
-  if (!Array.isArray(campaignData[section])) {
-    throw new Error("Invalid record section: " + section);
+  if (!Array.isArray(records)) {
+    throw new Error(`Invalid record section: ${section}`);
   }
 
-  const index = campaignData[section].findIndex(
-    item => item.id === id
-  );
+  const index = records.findIndex(item => item.id === id);
 
-  if (index === -1) return false;
+  if (index === -1) {
+    throw new Error("Record not found.");
+  }
 
-  const previous = campaignData[section][index];
+  const previous = records[index];
 
-  campaignData[section][index] = {
+  records[index] = {
     ...previous,
     ...updates,
-    id: previous.id,
-    updatedAt: new Date().toISOString()
+    id: previous.id
   };
 
-  return saveData();
+  try {
+    saveData();
+  } catch (error) {
+    records[index] = previous;
+    throw error;
+  }
+
+  return records[index];
 }
 
-/* DELETE RECORD */
+export function deleteRecord(section, id) {
+  const records = campaignData[section];
 
-function deleteRecord(section, id) {
-  if (!Array.isArray(campaignData[section])) {
-    throw new Error("Invalid record section: " + section);
+  if (!Array.isArray(records)) {
+    throw new Error(`Invalid record section: ${section}`);
   }
 
-  const previous = campaignData[section];
+  const index = records.findIndex(item => item.id === id);
 
-  campaignData[section] = previous.filter(
-    item => item.id !== id
-  );
-
-  if (campaignData[section].length === previous.length) {
+  if (index === -1) {
     return false;
   }
 
-  if (!saveData()) {
-    campaignData[section] = previous;
-    return false;
+  const removed = records.splice(index, 1)[0];
+
+  try {
+    saveData();
+  } catch (error) {
+    records.splice(index, 0, removed);
+    throw error;
   }
 
   return true;
 }
 
-/* FIND RECORD */
+export function findRecord(section, id) {
+  const records = campaignData[section];
 
-function findRecord(section, id) {
-  if (!Array.isArray(campaignData[section])) {
+  if (!Array.isArray(records)) {
     return null;
   }
 
-  return campaignData[section].find(
-    item => item.id === id
-  ) || null;
+  return records.find(item => item.id === id) || null;
 }
 
-/* EXPORT BACKUP */
+export function exportBackup() {
+  const backup = {
+    app: "SHOPY FONT First 50 Campaign Coach",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: campaignData
+  };
 
-function exportBackup() {
-  try {
-    const backup = {
-      application: "SHOPY FONT FIRST 50 CAMPAIGN COACH",
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      data: campaignData
-    };
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: "application/json" }
+  );
 
-    const blob = new Blob(
-      [JSON.stringify(backup, null, 2)],
-      { type: "application/json" }
-    );
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-    const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = `shopy-font-campaign-backup-${new Date()
+    .toISOString()
+    .slice(0, 10)}.json`;
 
-    const link = document.createElement("a");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 
-    link.href = url;
+  URL.revokeObjectURL(url);
+}
 
-    link.download =
-      "shopy-first50-backup-" +
-      new Date().toISOString().slice(0, 10) +
-      ".json";
-
-    link.click();
-
-    URL.revokeObjectURL(url);
-
-    return true;
-
-  } catch (error) {
-    console.error("Backup export failed:", error);
-    return false;
+export async function restoreBackup(file) {
+  if (!file) {
+    throw new Error("Choose a backup file first.");
   }
-}
 
-/* RESTORE BACKUP */
+  const text = await file.text();
+  const parsed = JSON.parse(text);
 
-function restoreBackup(file) {
-  return new Promise((resolve, reject) => {
+  const restoredData = parsed.data || parsed;
 
-    if (!file) {
-      reject(new Error("No backup file selected."));
-      return;
-    }
+  if (
+    !restoredData ||
+    typeof restoredData !== "object" ||
+    !Array.isArray(restoredData.prospects) ||
+    !Array.isArray(restoredData.activities)
+  ) {
+    throw new Error("This file is not a valid campaign backup.");
+  }
 
-    const reader = new FileReader();
+  const previousData = campaignData;
+  campaignData = normaliseData(restoredData);
 
-    reader.onload = event => {
-      try {
-        const backup = JSON.parse(event.target.result);
-
-        if (
-          backup.application !==
-          "SHOPY FONT FIRST 50 CAMPAIGN COACH"
-        ) {
-          throw new Error("This is not a valid campaign backup.");
-        }
-
-        if (
-          !backup.data ||
-          !Array.isArray(backup.data.prospects) ||
-          !Array.isArray(backup.data.activities)
-        ) {
-          throw new Error("Backup data is incomplete.");
-        }
-
-        const restored = {
-          ...cloneData(DEFAULT_DATA),
-          ...backup.data
-        };
-
-        campaignData = restored;
-
-        if (!saveData()) {
-          throw new Error("Could not save restored data.");
-        }
-
-        resolve(true);
-
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Unable to read backup file."));
-    };
-
-    reader.readAsText(file);
-  });
-}
-
-/* CLEAR CAMPAIGN DATA */
-
-function clearCampaignData() {
-  campaignData = cloneData(DEFAULT_DATA);
-
-  return saveData();
-}
-
-/* STORAGE AVAILABILITY */
-
-function checkStorage() {
   try {
-    const testKey = "__shopy_storage_test__";
+    saveData();
+  } catch (error) {
+    campaignData = previousData;
+    throw error;
+  }
 
+  return campaignData;
+}
+
+export function clearCampaignData() {
+  const previousData = campaignData;
+  campaignData = cloneDefaults();
+
+  try {
+    saveData();
+  } catch (error) {
+    campaignData = previousData;
+    throw error;
+  }
+
+  return campaignData;
+}
+
+export function checkStorage() {
+  try {
+    const testKey = `${STORAGE_KEY}_test`;
     localStorage.setItem(testKey, "ok");
     localStorage.removeItem(testKey);
 
-    return true;
-
+    return {
+      available: true,
+      message: "Browser storage is working."
+    };
   } catch (error) {
-    return false;
+    return {
+      available: false,
+      message: "Browser storage is unavailable or full."
+    };
   }
-}
-
-/* INITIAL STORAGE CHECK */
-
-if (!checkStorage()) {
-  console.error(
-    "Browser storage is unavailable. Campaign records cannot be saved."
-  );
-}
+   }
+     
