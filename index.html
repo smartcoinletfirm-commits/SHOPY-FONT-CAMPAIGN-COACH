@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SHOPY FONT | First 50 Campaign Coach</title>
+
+  <meta name="theme-color" content="#059669">
+  <meta name="description" content="Personal recruitment campaign management and First 50 mission tracker.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- APPLICATION LOCK -->
+  <section id="lock-screen" class="lock-screen hidden">
+    <div class="lock-card">
+      <div class="brand-mark">
+        <i class="fa-solid fa-globe"></i>
+      </div>
+
+      <h1>SHOPY FONT</h1>
+      <p>First 50 Campaign Coach</p>
+
+      <div id="lock-form-container"></div>
+    </div>
+  </section>
+
+  <!-- MAIN APPLICATION -->
+  <section id="main-screen" class="main-screen">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+
+      <div class="sidebar-brand">
+        <div class="brand-mark small">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+
+        <div class="brand-text">
+          <h2>SHOPY FONT</h2>
+          <span>CAMPAIGN COACH</span>
+        </div>
+      </div>
+
+      <!-- CAMPAIGN PROGRESS -->
+      <div class="campaign-mini-card">
+        <span class="mini-label">ACTIVE CAMPAIGN</span>
+        <h3>FIRST 50</h3>
+
+        <div class="mini-progress">
+          <div id="sidebar-progress-bar"></div>
+        </div>
+
+        <p id="sidebar-progress-text">0 / 50 members</p>
+      </div>
+
+      <!-- NAVIGATION -->
+      <nav id="navigation">
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <button class="nav-item active" data-page="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-page="prospects">
+          <i class="fa-solid fa-users"></i>
+          <span>Prospects & Follow-ups</span>
+          <span class="nav-badge" id="followup-count">0</span>
+        </button>
+
+        <button class="nav-item" data-page="missions">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>Daily Missions</span>
+        </button>
+
+        <button class="nav-item" data-page="activities">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <span>Activity Recorder</span>
+        </button>
+
+        <button class="nav-item" data-page="reminders">
+          <i class="fa-solid fa-bell"></i>
+          <span>Reminders & Tasks</span>
+        </button>
+
+        <div class="nav-label">PERFORMANCE</div>
+
+        <button class="nav-item" data-page="social">
+          <i class="fa-solid fa-share-nodes"></i>
+          <span>Social Media Tracker</span>
+        </button>
+
+        <button class="nav-item" data-page="analytics">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Graphs & Statistics</span>
+        </button>
+
+        <button class="nav-item" data-page="coach">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI Campaign Coach</span>
+        </button>
+
+        <div class="nav-label">CAMPAIGN MANAGEMENT</div>
+
+        <button class="nav-item" data-page="challenges">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Problems & Challenges</span>
+        </button>
+
+        <button class="nav-item" data-page="history">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Campaign History</span>
+        </button>
+
+        <button class="nav-item" data-page="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings & Backup</span>
+        </button>
+
+      </nav>
+
+      <!-- SIDEBAR FOOTER -->
+      <div class="sidebar-footer">
+        <div class="user-profile">
+
+          <div class="user-avatar">
+            <i class="fa-solid fa-user"></i>
+          </div>
+
+          <div class="user-info">
+            <strong>Campaign Owner</strong>
+            <span>Personal workspace</span>
+          </div>
+
+          <button id="lock-app-btn" title="Lock application">
+            <i class="fa-solid fa-lock"></i>
+          </button>
+
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content-area">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <button id="mobile-menu-btn" class="icon-button">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="page-heading">
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle">
+            Your daily recruitment performance at a glance.
+          </p>
+        </div>
+
+        <div class="topbar-actions">
+
+          <button id="notification-btn" class="icon-button" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-dot"></span>
+          </button>
+
+          <button id="quick-record-btn" class="primary-button">
+            <i class="fa-solid fa-plus"></i>
+            <span>Record Activity</span>
+          </button>
+
+        </div>
+
+      </header>
+
+      <!-- DYNAMIC PAGE CONTENT -->
+      <div id="page-container"></div>
+
+    </main>
+
+  </section>
+
+  <!-- GLOBAL MODALS -->
+  <div id="modal-container"></div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-container"></div>
+
+</div>
+
+<!-- APPLICATION SCRIPT -->
+<script type="module" src="app.js"></script>
+
+</body>
+          </html>
